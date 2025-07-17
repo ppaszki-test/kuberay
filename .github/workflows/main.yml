@@ -13,7 +13,8 @@ on:
 jobs:
   test_kuberay_deployment_and_upgrade:
     # runs-on: ubuntu-22.04
-    runs-on: kuberay-test
+    # runs-on: kuberay-test
+    runs-on: kuberay-8-32
 
     steps:
       - name: Get System Information

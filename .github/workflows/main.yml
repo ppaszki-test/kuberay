@@ -51,20 +51,24 @@ jobs:
           curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
           chmod +x ./kind
           mv ./kind /usr/local/bin/kind
-      - name: Create Kind Cluster
-        run: kind create cluster #--image=kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
+
+      # - name: Create Kind Cluster
+      #   run: kind create cluster #--image=kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
+
+      - name: Setup and start KinD cluster
+        uses: ./.github/workflows/actions/kind
 
       - name: Set kubectl context
         run: kubectl cluster-info --context kind-kind
 
-      - name: Describe nodes
-        run: kubectl describe nodes
+      # - name: Describe nodes
+      #   run: kubectl describe nodes
 
-      - name: wait for nodes ready
-        run: |
-          for node in $(kubectl get nodes -o jsonpath='{.items[*].metadata.name}'); do
-            kubectl wait --for=condition=Ready "node/$node" --timeout=300s
-          done
+      # - name: wait for nodes ready
+      #   run: |
+      #     for node in $(kubectl get nodes -o jsonpath='{.items[*].metadata.name}'); do
+      #       kubectl wait --for=condition=Ready "node/$node" --timeout=300s
+      #     done
       - name: Install Older KubeRay Operator (v1.3.2)
         run: |
           helm repo add kuberay https://ray-project.github.io/kuberay-helm/

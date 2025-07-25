@@ -14,9 +14,9 @@ jobs:
       # start test
       - name: dummy test
         run: |
-          # sleep 300 # test success
-          sleep 300 # test failure
-          exit 1 # test failure
+          sleep 300 # test success
+          # sleep 300 # test failure
+          # exit 1 # test failure
       
       # end test
       # - name: Checkout kuberay Repository

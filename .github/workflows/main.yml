@@ -8,26 +8,31 @@ on:
   #   branches:
   #     - dev
   #     - 'release-*'
-  workflow_dispatch: # to allow running on demand
+  # workflow_dispatch: # to allow running on demand
+  repository_dispatch:
+    types: [branch-dispatch]
 
 jobs:
-  test_kuberay_deployment_and_upgrade:
+  run_kuberay_upgrade_tests:
     # runs-on: ubuntu-22.04
-    # runs-on: kuberay-test
-    runs-on: kuberay-8-32
-
+    runs-on: kuberay-test
+    # runs-on: kuberay-8-32
+    permissions:
+      contents: read
     steps:
-      - name: Get System Information
-        id: system-info
-        uses: kenchan0130/actions-system-info@master
-      - name: Print CPU and RAM
-        run: |
-          echo "CPU Cores: ${{ steps.system-info.outputs.cpu-core }}"
-          echo "Total Memory: ${{ steps.system-info.outputs.totalmem }}"
-      - name: Checkout Repository
+    #   - name: Get System Information
+    #     id: system-info
+    #     uses: kenchan0130/actions-system-info@master
+    #   - name: Print CPU and RAM
+    #     run: |
+    #       echo "CPU Cores: ${{ steps.system-info.outputs.cpu-core }}"
+    #       echo "Total Memory: ${{ steps.system-info.outputs.totalmem }}"
+      - name: Checkout kuberay Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          repository: pawelpaszki/kuberay
+          # fetch-depth: 0
+          ref: ${{ github.event.client_payload.branch }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -56,7 +61,10 @@ jobs:
       #   run: kind create cluster #--image=kindest/node:v1.25.0@sha256:428aaa17ec82ccde0131cb2d1ca6547d13cf5fdabcc0bbecf749baa935387cbf
 
       - name: Setup and start KinD cluster
-        uses: ./.github/workflows/actions/kind
+        run:
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+          chmod +x ./kind
+          mv ./kind /usr/local/bin/kind
 
       - name: Set kubectl context
         run: kubectl cluster-info --context kind-kind
@@ -83,13 +91,13 @@ jobs:
           KUBERAY_TEST_TIMEOUT_SHORT=1m KUBERAY_TEST_TIMEOUT_MEDIUM=5m KUBERAY_TEST_TIMEOUT_LONG=10m KUBERAY_TEST_UPGRADE_IMAGE=v1.4.0 \
           go test -timeout 30m -v ./test/e2eupgrade
           echo "--- END:e2e Operator upgrade (v1.3.2 to v1.4.0 operator) tests finished"
-      - name: Check runner disk usage
-        if: always()
-        run: |
-          echo "Disk Usage of GitHub Runner:"
-          df -h
+      # - name: Check runner disk usage
+      #   if: always()
+      #   run: |
+      #     echo "Disk Usage of GitHub Runner:"
+      #     df -h
       - name: Debug Kubernetes Cluster on Failure
-        if: always()
+        if: failure()
         run: |
           echo "--- DEBUG OUTPUT ---"
           echo "Checking GitHub Runner resources..."

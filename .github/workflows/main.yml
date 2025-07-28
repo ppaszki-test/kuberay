@@ -23,9 +23,8 @@ jobs:
         run: |
           git clone --depth=1 \
             --branch "${{ github.event.client_payload.branch }}" \
-            "https://github.com/${{ github.event.client_payload.fork_repo }}.git" \
-            pr-code
-          cd pr-code
+            "https://github.com/${{ github.event.client_payload.fork_repo }}.git" 
+            
       # - name: Checkout kuberay Repository
       #   uses: actions/checkout@v4
       #   with:

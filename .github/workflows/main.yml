@@ -40,6 +40,7 @@ jobs:
 
       - name: Install go dependencies
         run: |
+          ls
           cd ${{ github.workspace }}/ray-operator
           go mod download
       - name: Install helm
